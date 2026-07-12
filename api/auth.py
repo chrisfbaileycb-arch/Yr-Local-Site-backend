@@ -114,3 +114,41 @@ def get_request_scoped_db(credentials: Optional[HTTPAuthorizationCredentials] = 
     if credentials:
         client.postgrest.auth(credentials.credentials)
     return client
+
+
+def _check_is_admin(user_id: str) -> bool:
+    """
+    Internal helper: checks user_roles table for admin role.
+    Uses the cached service-role client (safe — only reads role, no user data).
+    Extensible: adding a new admin = UPDATE user_roles SET role='admin' WHERE user_id=?
+    No code change, no redeployment needed.
+    """
+    from db.client import get_db
+    try:
+        res = get_db().table("user_roles").select("role").eq("user_id", user_id).execute()
+        return any(r.get("role") == "admin" for r in (res.data or []))
+    except Exception:
+        return False
+
+
+def get_admin_user(
+    user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """
+    FastAPI dependency that enforces admin role on any endpoint.
+
+    Usage:
+        @router.get("/admin-only")
+        async def my_route(admin=Depends(get_admin_user)):
+            ...  # guaranteed to be an admin here
+
+    To grant admin access to a new user (no code change required):
+        UPDATE public.user_roles SET role = 'admin' WHERE user_id = '<uuid>';
+    """
+    if not _check_is_admin(user["sub"]):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role required. Contact the system administrator.",
+        )
+    return user
+

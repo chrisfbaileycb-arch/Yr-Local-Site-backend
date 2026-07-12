@@ -231,7 +231,25 @@ def render_site_blocks(site: Dict[str, Any]) -> str:
   </div>
 </section>""")
 
+        elif kind == "custom_html":
+            # ── Custom HTML/CSS escape hatch ──────────────────────────────
+            # Raw HTML + optional CSS injected directly for bespoke sections.
+            # CSS is scoped to a unique wrapper ID to prevent style bleed
+            # into adjacent sections.
+            # SECURITY NOTE: No sanitization — intentional. This is a private
+            # admin-only tool. If ever exposed to non-admins, add bleach/DOMPurify.
+            raw_html = section.get("html", "") or ""
+            raw_css  = section.get("css",  "") or ""
+            section_id = f"custom-{esc(str(section.get('id', idx)))}"
+            scoped_css = ""
+            if raw_css.strip():
+                scoped_css = f"<style>#{section_id} {{ {raw_css} }}</style>\n"
+            html_parts.append(f"""{scoped_css}<section id="{section_id}" class="epa-section yls-custom">
+  {raw_html}
+</section>""")
+
     return "\n".join(html_parts)
+
 
 def render_site_html(site: Dict[str, Any], is_client_view: bool = False) -> str:
     """Assembles the final, complete HTML document with styles, SEO head, and script injections."""
@@ -269,7 +287,7 @@ def render_site_html(site: Dict[str, Any], is_client_view: bool = False) -> str:
     if not white_label:
         footer_html = """
   <footer class="epa-footer">
-    Built with <a href="https://expoproxy.ai" style="color: hsl(38 92% 50%); text-decoration: none;">Expo Proxy AI</a>
+    Built with <a href="https://yr-local.site" style="color: hsl(38 92% 50%); text-decoration: none;">Yr Local</a>
   </footer>"""
 
     og_image_meta = f'<meta property="og:image" content="{og_img}" />' if og_img else ''

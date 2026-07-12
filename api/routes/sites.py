@@ -15,7 +15,7 @@ router = APIRouter(prefix="/sites", tags=["sites"])
 # --- Pydantic Schemas for Sections ---
 
 class SiteSectionCreate(BaseModel):
-    kind: Literal['hero', 'about', 'services', 'gallery', 'testimonials', 'contact', 'cta', 'footer']
+    kind: Literal['hero', 'about', 'services', 'gallery', 'testimonials', 'contact', 'cta', 'footer', 'custom_html']
     position: int = Field(default=0, ge=0, description="Display position/order of the section")
     content: Dict[str, Any] = Field(default_factory=dict, description="Section specific content payload")
 
@@ -23,7 +23,7 @@ class SiteSectionCreate(BaseModel):
 class SiteSectionResponse(BaseModel):
     id: UUID
     site_id: UUID
-    kind: Literal['hero', 'about', 'services', 'gallery', 'testimonials', 'contact', 'cta', 'footer']
+    kind: Literal['hero', 'about', 'services', 'gallery', 'testimonials', 'contact', 'cta', 'footer', 'custom_html']
     position: int
     content: Dict[str, Any]
     updated_at: datetime
@@ -90,6 +90,17 @@ class SiteBase(BaseModel):
     seo_description: Optional[str] = Field(None, max_length=155)
     og_image_url: Optional[str] = None
     brand_color: Optional[str] = None
+    # ── Client management ──────────────────────────────────────
+    client_name: Optional[str] = None
+    client_email: Optional[str] = None
+    custom_domain: Optional[str] = None
+    monthly_rate: Optional[float] = None
+    client_notes: Optional[str] = None
+    # ── Deployment tracking ────────────────────────────────────
+    netlify_site_id: Optional[str] = None
+    deployment_url: Optional[str] = None
+    deployment_status: Optional[str] = 'not_deployed'
+    last_deployed_at: Optional[datetime] = None
 
 
 class SiteCreate(SiteBase):
@@ -114,6 +125,12 @@ class SiteUpdate(BaseModel):
     brand_color: Optional[str] = None
     sections: Optional[List[SiteSectionCreate]] = None
     products: Optional[List[ProductUpdate]] = None
+    # ── Client management ──────────────────────────────────────
+    client_name: Optional[str] = None
+    client_email: Optional[str] = None
+    custom_domain: Optional[str] = None
+    monthly_rate: Optional[float] = None
+    client_notes: Optional[str] = None
 
     @field_validator("brand_color")
     @classmethod

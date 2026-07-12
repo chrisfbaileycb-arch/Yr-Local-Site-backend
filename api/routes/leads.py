@@ -73,7 +73,7 @@ async def send_lead_email_notification(
     email_body = {
         "from": resend_from,
         "to": [resend_to],
-        "subject": f"New Lead: {escaped_name} — Expo Proxy AI",
+        "subject": f"New Lead: {escaped_name} — Yr Local",
         "html": f"""<p><strong>Name:</strong> {escaped_name}</p>
 <p><strong>Email:</strong> {escaped_email}</p>
 <p><strong>Project Type:</strong> {escaped_project}</p>

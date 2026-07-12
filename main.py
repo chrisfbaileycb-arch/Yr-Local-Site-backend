@@ -6,7 +6,7 @@ from api.routes.ssr import router as ssr_router
 from api.auth import get_current_user
 from api.routes import api_router
 
-app = FastAPI(title="Expo Proxy AI Backend")
+app = FastAPI(title="Yr Local Backend")
 
 # Configure CORS middleware
 allowed_origins_raw = os.getenv("ALLOWED_ORIGINS")
@@ -34,7 +34,7 @@ app.include_router(api_router, prefix="/api")
 
 @app.get("/")
 def read_root():
-    return {"status": "ok", "message": "Expo Proxy AI Backend API"}
+    return {"status": "ok", "message": "Yr Local Backend API"}
 
 @app.get("/health")
 def health_check(response: Response):
